@@ -1,3 +1,5 @@
+# Microservice Architecture
+
 ## MSA Components
 
 ### Clients
@@ -10,28 +12,28 @@
 
 - docker
 - API Gateway
-  - Clients <-> API Gateway <-> Microservices
+  - Clients <-> API Gateway <-> Microservice
 - Authentication Service
   - Provides access token for microservice
 - Event Bus
-  - Microservices <-> Event Bus
+  - Microservice <-> Event Bus
 
 ## Microservices as RESTful APIs
 
-> is based on an architectural style known as REST
+> which is based on an architectural style known as REST
 
 ### Why RESTful APIs
 
-- Simplicity: It is easy to understand since HTTP verbs are based on CRUD
+- **Simplicity**: It is easy to understand since HTTP verbs are based on CRUD
 - It is designed to be stateless and separates the concerns of the client and the server
 - REST reads can be cached for better performance and scalability
 - It supports many data formats
 
 ## API Gateway
 
-<img src="https://docs.microsoft.com/ko-kr/azure/architecture/microservices/images/gateway.png" width="70%">
+![API_Gateway](./image/gateway.png)
 
-### Why API Gayeway
+### Why do we use API Gateway
 
 **Having to keep track of multiple microservice endpoints complicates client integration  
 especially when microservices are moved.**
@@ -41,25 +43,55 @@ especially when microservices are moved.**
 - Services don't have to handle their own security concerns, including SSL termination and authentication
 
 ## Event Bus
+![Event_Bus](./image/gateway.png)<sup id="a1">[1](#f1)</sup>
 
-## CQRS
 
-Command <-> Query  
-Read > Write  
-Tables are different between command and query  
+
+An event bus can be classified as the backbone of a decoupled microservices architecture. It allows microservices to communicate with each other without having to know about each other.  
+
+This type of communication is based on the Publish/Subscribe pattern, which is similar to the Observer Pattern. However, with the Observer Pattern the publisher or observable broadcasts changes directly to its subscribers or observers. Whereas with the Publish/Subscribe pattern, **the Event Bus takes up the role of the middleman and sits between the publisher and subscriber.**  
+
+In this way, microservices that publish events to the event bus, does not have to know what other microservices want to do with the published events, it only need to make sure that it is available on the event bus for consumption.
+
+
+
+## CQRS(Command Query Responsibility Segregation)
+
+![cqrs](./image/cqrs.png)<sup id="a2">[2](#f2)</sup>
+
+- **Command**: Operations that alters the state of an object or entity.(Write, CUD)
+- **Queries**: Operations that return the state of an object or entity.(Read, R)
+
+### Why do we need CQRS
+
+- Generally, data is more frequently queried than altered.
+- Separating commands and queries allows us to iptimise each for high performance.
+- Executing command and query operations on the same model could cause data contention.
 
 ## Event Sourcing  
 
+**Event Sourcing** defines an approach where all the changes that are made to an object or entity, are stored as **a sequence of immutable events to an event store**, as opposed to storing just the current state.
+
+- The event store provides a complete log of every state change, effectively creating an audit trail of the entire system
+- The state of any object can be recreated by replaying the event store
+
 ## Saga Pattern  
 
-distributed transaction  
+- The Saga Pattern is a design pattern that provides a solution for implementing transactions in the form of sagas that span across two or more microserivces. It is a way to manage data consistency across microservices in distributed transaction scenarios.
+- A saga is a sequence of transactions that updates each service and publishes a message or event to trigger the next transaction step. If a step fails, the saga executes compensating transactions that counteract the preceding transactions.
+
+![saga](./image/saga.png)<sup id="a3">[3](#f3)</sup>
+
+### Choreography-Based Saga
+
+![saga_choreography](image/saga_choreography.png)<sup id="a4">[4](#f4)</sup>
+
+### Orchestration-Based Saga
+
+- A single orchestrator (arranger) manages all the transactions and directs services to execute local transactions.
+
+![saga_orchestrator](image/saga_orchestrator.png)<sup id="a5">[5](#f5)</sup>
 ACID  
-
-### saga
-
-#### Choreography-Based Saga
-
-#### Orchestration-Based Saga
 
 ## Success Factors
 
@@ -193,5 +225,14 @@ ACID
 ## Converting a Monolithic Application Into Microservices
 
 ## Recommandations
+
 - Building Microservices by Sam Newman
 - ...
+
+## References
+
+<b id="f1">1</b> [microsoft_gateway](https://docs.microsoft.com/ko-kr/azure/architecture/microservices/design/gateway) [↩](#a1)  
+<b id="f2">2</b> [modernization-data-persistence/cqrs-pattern.html](https://docs.aws.amazon.com/ko_kr/prescriptive-guidance/latest/modernization-data-persistence/cqrs-pattern.html)  [↩](#a2)  
+<b id="f3">3</b> [azure_saga](https://docs.microsoft.com/en-us/azure/architecture/reference-architectures/saga/saga) [↩](#a3)  
+<b id="f4">4</b> Microservices Patterns with Examples in Java [↩](#a4)  
+<b id="f5">5</b> Microservices Patterns with Examples in Java [↩](#a5)
